@@ -15,6 +15,9 @@ win: LDFLAGS+=-static-libgcc -static-libstdc++ -static
 win: EXEC:=$(EXEC).exe
 win: comp
 
+droid: LDFLAGS+=-lgnustl_shared
+droid: linux
+
 linux: EXEC:=$(EXEC).out
 linux: comp
 
