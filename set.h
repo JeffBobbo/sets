@@ -21,7 +21,23 @@ public:
   Set<T> intersect(const Set<T>& other) const;
   Set<T> difference(const Set<T>& other) const;
 
+  std::list<Set<T> > power() const;
+
   Set& sort() { set.sort(); return *this; };
+
+  template <typename U>
+  friend bool operator==(const Set<U>& a, const Set<U>& b);
+  template <typename U>
+  friend Set<U> operator+(const Set<U>& a, const Set<U>& b);
+  template <typename U>
+  friend Set<U> operator-(const Set<U>& a, const Set<U>& b);
+
+  T operator[](int i) const
+  {
+    typename std::list<T>::const_iterator it = set.begin();
+    std::advance(it, i);
+    return *it;
+  }
 
   template <typename U>
   friend std::ostream& operator<<(std::ostream& os, const Set<U>& s);
@@ -109,6 +125,49 @@ Set<T> Set<T>::difference(const Set<T>& other) const
   return r;
 }
 
+template<typename T>
+std::list<Set<T> > Set<T>::power() const
+{
+  std::list<Set<T> > r;
+
+  const unsigned long long p = 1 << set.size();
+
+  for (unsigned long long i = 0; i < p; ++i)
+  {
+    Set<T> s;
+    for (unsigned long long j = 0; j < set.size(); ++j)
+    {
+      if ((1 << j) & i)
+        s.push_front((*this)[j]);
+    }
+    r.push_front(s);
+  }
+  return r;
+}
+
+template <typename U>
+bool operator==(const Set<U>& a, const Set<U>& b)
+{
+  return (a-b).empty() == (b-a).empty();
+}
+
+template <typename U>
+Set<U> operator+(const Set<U>& a, const Set<U>& b)
+{
+  return a.unionize(b);
+}
+template <typename U>
+Set<U> operator-(const Set<U>& a, const Set<U>& b)
+{
+  Set<U> r;
+  typename std::list<U>::const_iterator it = a.set.begin();
+  for (; it != a.set.end(); ++it)
+  {
+    if (!b.contains(*it))
+      r.push_front(*it);
+  }
+  return r;
+}
 
 template <typename U>
 std::ostream& operator<<(std::ostream& os, const Set<U>& s)
