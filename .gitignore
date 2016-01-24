@@ -1,0 +1,4 @@
+*.o
+*.sublime-*
+*.out
+*.exe
