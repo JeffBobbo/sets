@@ -26,7 +26,31 @@ bool testStreamOps()
   if (s.size() != 4)
     return false;
   ss >> s;
-  return s.size() == 7;
+  if (s.size() != 7)
+    return false;
+  std::stringstream os;
+  os << s;
+  return os.str() == "{a, b, c, d, x, y, z}";
+}
+
+bool testCombinations()
+{
+  Set<char> a, b;
+  std::stringstream sa("{a, b, c}");
+  sa >> a;
+  std::stringstream sb("{b, c, d}");
+  sb >> b;
+
+  Set<char> aub = a.unionize(b);
+  if (aub.size() != 4)
+    return false;
+  Set<char> anb = a.intersect(b);
+  if (anb.size() != 2)
+    return false;
+  Set<char> adb = a.difference(b);
+  if (adb.size() != 2)
+    return false;
+  return true;
 }
 
 int main()
@@ -41,6 +65,12 @@ int main()
     std::cout << "testStreamOps() failed" << std::endl;
     return 1;
   }
+  if (testCombinations() == false)
+  {
+    std::cout << "testCombinations() failed" << std::endl;
+    return 1;
+  }
+
   Set<char> s1;
   s1.push_front('c');
   s1.push_front('b');
@@ -57,32 +87,13 @@ int main()
   s3 -= s2;
   std::cout << s3 << std::endl;
 
-  Set<char> e;
-  std::cout << e << std::endl;
-
-  Set<char> d;
-  std::string str = "{a, b, c, d} {c, d, f, a}";
-  std::istringstream is(str);
-  is >> e;
-  is >> d;
-  std::cout << e << std::endl;
-  std::cout << d << std::endl;
-  std::cout << e.difference(d).sort() << std::endl;
-  std::cout << (e + d) << std::endl;
-  std::cout << (e += d) << std::endl;
-
-  if ((e + d) == e.unionize(d))
-    std::cout << " e and d unionize" << std::endl;
-
-  std::cout << (e -= d).size() << std::endl;
-
   Set<std::string> names;
   std::istringstream sNames("{James, Bob, Alice, Samantha}");
   sNames >> names;
   for (int i = 0; i < names.size(); ++i)
     std::cout << names[i] << std::endl;
 
-  std::list<Set<char> > power = e.power();
+  std::list<Set<char> > power = s1.power();
 
   for (std::list<Set<char> >::iterator it = power.begin(); it != power.end(); ++it)
     std::cout << *it << " ";
