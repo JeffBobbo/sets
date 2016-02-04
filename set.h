@@ -13,7 +13,7 @@ public:
 
   bool contains(const T t) const;
   bool empty() const { return (set.begin() == set.end()); };
-
+  int size() const { return set.size(); };
   Set& push_front(const T t);
   Set& push_back(const T t);
 
@@ -31,13 +31,10 @@ public:
   friend Set<U> operator+(const Set<U>& a, const Set<U>& b);
   template <typename U>
   friend Set<U> operator-(const Set<U>& a, const Set<U>& b);
+  Set<T>& operator+=(const Set<T>& o);
+  Set<T>& operator-=(const Set<T>& o);
 
-  T operator[](int i) const
-  {
-    typename std::list<T>::const_iterator it = set.begin();
-    std::advance(it, i);
-    return *it;
-  }
+  T operator[](const int i) const;
 
   template <typename U>
   friend std::ostream& operator<<(std::ostream& os, const Set<U>& s);
@@ -45,16 +42,29 @@ public:
   friend std::istream& operator>>(std::istream& is, Set<U>& s);
 
 private:
+/*
+  typename std::list<T>::iterator find(const T t)
+  {
+    typename std::list<T>::iterator it = set.begin();
+    while (it != set.end() && *it != t)
+      ++it;
+    return it;
+  }
+*/
   std::list<T> set;
 };
 
 template <typename T>
 bool Set<T>::contains(const T t) const
 {
-  for (typename std::list<T>::const_iterator it = set.begin(); it != set.end(); ++it)
+//  typename std::list<T>::iterator it = find(t);
+//  return it != set.end();
+  typename std::list<T>::const_iterator it = set.begin();
+  while (it != set.end())
   {
     if (*it == t)
       return true;
+    ++it;
   }
   return false;
 }
@@ -70,6 +80,9 @@ Set<T>& Set<T>::push_front(const T t)
 template <typename T>
 Set<T>& Set<T>::push_back(const T t)
 {
+//  typename std::list<T>::iterator it = find(t);
+//  if (it == set.end())
+//    set.insert(it, t);
   if (!contains(t))
     set.push_back(t);
   return *this;
@@ -89,7 +102,6 @@ Set<T> Set<T>::unionize(const Set<T>& other) const
   {
     if (r.contains(*it) == false)
       r.push_front(*it);
-
   }
   return r;
 }
@@ -168,6 +180,38 @@ Set<U> operator-(const Set<U>& a, const Set<U>& b)
   }
   return r;
 }
+template <typename T>
+Set<T>& Set<T>::operator+=(const Set<T>& o)
+{
+  typename std::list<T>::const_iterator it = o.set.begin();
+  for (; it != o.set.end(); ++it)
+    push_back(*it);
+  return *this;
+}
+template <typename T>
+Set<T>& Set<T>::operator-=(const Set<T>& o)
+{
+  typename std::list<T>::iterator it = set.begin();
+  while (it != set.end())
+  {
+    if (o.contains(*it))
+    {
+      set.erase(it);
+      it = set.begin();
+      break;
+    }
+    ++it;
+  }
+  return *this;
+}
+
+template <typename T>
+T Set<T>::operator[](const int i) const
+{
+  typename std::list<T>::const_iterator it = set.begin();
+  std::advance(it, i);
+  return *it;
+}
 
 template <typename U>
 std::ostream& operator<<(std::ostream& os, const Set<U>& s)
@@ -185,10 +229,12 @@ std::ostream& operator<<(std::ostream& os, const Set<U>& s)
   return os;
 }
 
+
+
 template <typename U>
 std::istream& operator>>(std::istream& is, Set<U>& s)
 {
-  s.set.clear();
+//  s.set.clear();
   std::string set;
   std::string tmp;
   is >> set;
@@ -207,7 +253,7 @@ std::istream& operator>>(std::istream& is, Set<U>& s)
     std::stringstream ss(set.substr(start, stop-start));
     U u;
     ss >> u;
-    s.push_front(u);
+    s.push_back(u);
     start = stop + 1;
     stop = set.find(',', start);
   }
